@@ -9,6 +9,7 @@ def append_to_file(file_path: str, content: str) -> None:
 def main():
     HOST = "localhost"
     PORT = 12345
+    LOGFILE_PATH = "./example_mini_server/incoming.txt"
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # AF_INET stands for Adress Family (AF) INET so this socket is bound to an IPV4 address and can only interact with other sockets like this, socket.SOCK_STREAM specifies TCP
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind((HOST, PORT))
@@ -24,20 +25,20 @@ def main():
             chunk = connection.recv(8192) # This blocks the inner loop till the TCP connection is terminated at the client so that way we don't close it accidentally when the client temporarily stops sending data
             if not chunk: # If the data is too big and gets buffered (past 1024 here) it goes in the socket buffer and gets passed on the next iteration, if data stopped blocking and is None, the connection is closed so close inner loop
                 if current_line:
-                    append_to_file("incoming.txt", current_line.decode("utf-8"))
+                    append_to_file(LOGFILE_PATH, current_line.decode("utf-8"))
                 break
             
             previous_newline = -1
             for i in range(len(chunk)):
                 if chunk[i] == 10: # 10 is the byte for \n
-                    current_line += chunk[previous_newline:i]
-                    append_to_file("incoming.txt", current_line.decode("utf-8"))
+                    current_line += chunk[previous_newline+1:i]
+                    append_to_file(LOGFILE_PATH, current_line.decode("utf-8"))
                     current_line = b""
                     previous_newline = i
             if previous_newline == -1:
                 current_line += chunk
             else:
-                current_line += chunk[previous_newline:]
+                current_line += chunk[previous_newline+1:]
 
 if __name__ == "__main__":
     main()

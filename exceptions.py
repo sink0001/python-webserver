@@ -1,0 +1,1 @@
+class MalformedRequestLineError(Exception): pass

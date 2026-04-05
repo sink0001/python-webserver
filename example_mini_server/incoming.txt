@@ -1,0 +1,8 @@
+POST / HTTP/1.1
+Host: localhost:12345
+User-Agent: curl/8.15.0
+Accept: */*
+Content-Length: 11
+Content-Type: application/x-www-form-urlencoded
+
+{key:value}
