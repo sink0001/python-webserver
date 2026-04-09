@@ -31,7 +31,7 @@ Content-Type: application/json
 '''
 
 
-def parse_request_line(request: bytes) -> tuple[dict[str, str], str]:
+def parse_request_line(request: bytes) -> tuple[dict[str, str], bytes]:
     '''
     take in HTTP request and parse the request line so take in
     POST / HTTP/1.1
@@ -48,7 +48,7 @@ def parse_request_line(request: bytes) -> tuple[dict[str, str], str]:
     '''
     split_index = request.index(b"\r\n")
     request_line_string = request[:split_index].decode("utf-8")
-    rest_of_request = request[split_index+2:].decode("utf-8")
+    rest_of_request = request[split_index+2:]
 
     request_line_parts = request_line_string.split(" ")
     if len(request_line_parts) != 3:

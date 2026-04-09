@@ -23,7 +23,7 @@ def main():
         current_line = b"" # once a connection has been gotten we want to read text data from it line by line and current_line is buffer I use in the inner loop which executes a bunch of times getting a new chunk of data each time
         while True: # once a TCP connection is established you read data from it until the other side closes the TCP connection, at which point you go back into the outer loop listening for a new connection
             chunk = connection.recv(8192) # This blocks the inner loop till the TCP connection is terminated at the client so that way we don't close it accidentally when the client temporarily stops sending data
-            if not chunk: # If the data is too big and gets buffered (past 1024 here) it goes in the socket buffer and gets passed on the next iteration, if data stopped blocking and is None, the connection is closed so close inner loop
+            if not chunk: # If the data is too big and gets buffered (past 8192 here) it goes in the socket buffer and gets passed on the next iteration, if data stopped blocking and is None, the connection is closed so close inner loop
                 if current_line:
                     append_to_file(LOGFILE_PATH, current_line.decode("utf-8"))
                 break
