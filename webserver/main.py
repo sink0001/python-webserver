@@ -22,6 +22,7 @@ def main():
                 break
             
             '''
+            if theres a content-length maybe parse request line and headers first instead of waiting for efficiency
             for character in chunk: double CRLF is 4 bytes adjust for that
                 current_request += character
                 if character == double CRLF and Content-Length not in current_request:
