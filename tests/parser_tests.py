@@ -27,7 +27,8 @@ def test_http_request_line_parser() -> None:
 
 def test_http_header_parsing() -> None:
     correct_test_input = b"Host: localhost:12345\r\nUser-Agent: curl/8.15.0\r\nAccept: */*\r\n\r\n"
-    assert (http_parser.parse_headers(correct_test_input) == {"Host": "localhost:12345", "User-Agent": "curl/8.15.0", "Accept": "*/*"}), "didn't parse headers for correctly formed input correctly"
+    assert (http_parser.parse_headers(correct_test_input) == {"host": "localhost:12345", "user-agent": "curl/8.15.0", "accept": "*/*"}), "didn't parse headers for correctly formed input correctly"
+    assert (http_parser.parse_headers(b"Host: localhost:12345") == {"host": "localhost:12345"}), "didn't parse headers for correctly formed input correctly"
 
     assert (http_parser.parse_headers(b"\r\n") == {}), "didn't return an empty dictionary when no headers were given"
 
@@ -44,6 +45,13 @@ def test_http_header_parsing() -> None:
         pass
     else:
         raise AssertionError("header line parsing function didn't throw a MalformedHeaderError when one of the headers didn't contain a ':'")
+    
+    try:
+        http_parser.parse_headers(b"H@st: localhost:12345")
+    except MalformedHeaderError:
+        pass
+    else:
+        raise AssertionError("header name contained an illegal character but function didn't raise a MalformedHeaderError")
 
 
 test_http_request_line_parser()
