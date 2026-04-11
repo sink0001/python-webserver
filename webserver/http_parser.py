@@ -41,7 +41,7 @@ def header_name_valid(header_name: bytes) -> bool:
     return True
 
 
-def parse_headers(request_headers: bytes) -> dict[str, str]:
+def parse_headers(request_headers: bytes) -> dict[str, list[str]]:
     '''
     take in the headers part of a HTTP request (rest of request after parse_request_line)
     return a dict of headers, e.g. take in Host: localhost:12345\r\nUser-Agent: curl/8.15.0\r\nAccept: */*
@@ -59,7 +59,12 @@ def parse_headers(request_headers: bytes) -> dict[str, str]:
             header_name, header_value = header.split(b":", 1)
             if not header_name_valid(header_name):
                 raise MalformedHeaderError(f"header name {header_name} contains an illegal character")
-            request_header_dict[header_name.decode("utf-8").lower()] = header_value.decode("utf-8").strip().lower()
+            
+            decoded_header_name = header_name.decode("utf-8").lower()
+            if request_header_dict.get(decoded_header_name):
+                request_header_dict[decoded_header_name].append(header_value.decode("utf-8").strip().lower())
+            else:
+                request_header_dict[decoded_header_name] = [header_value.decode("utf-8").strip().lower()]
         else:
             raise MalformedHeaderError(f"expected ':' in header but ':' wasn't found")
 
