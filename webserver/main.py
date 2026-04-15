@@ -1,10 +1,10 @@
 import socket
+from webserver.http_parser import parse_request_line, parse_headers
 
 
 def main():
     HOST = "localhost"
     PORT = 12345
-    LOGFILE_PATH = "./example_mini_server/incoming.txt"
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind((HOST, PORT))
@@ -15,23 +15,28 @@ def main():
         connection, address = sock.accept()
         print(f"connection: {connection} address: {address}")
 
-        current_line = b""
+        current_request = b""
         while True:
             chunk = connection.recv(8192)
             if not chunk:
                 break
             
-            '''
-            if theres a content-length maybe parse request line and headers first instead of waiting for efficiency
-            for character in chunk: double CRLF is 4 bytes adjust for that
-                current_request += character
-                if character == double CRLF and Content-Length not in current_request:
-                    parse_current_request()
-                    do_current_request_logic()
+            for i in range(4, len(chunk)+1):
+                last_4_bytes = chunk[i-4:i]
+                if i % 4 == 0:
+                    current_request += last_4_bytes
+
+                if last_4_bytes == b"\r\n\r\n":
+                    print(current_request)
+                    request_line, rest_of_request = parse_request_line(current_request)
+                    headers = parse_headers(rest_of_request)
+
+                    print(f"Request line:\n- Method: {request_line["method"]}\n- Target: {request_line["target"]}\n- Version: {request_line["http_version"]}")
+                    for header in headers:
+                        for value in headers[header]:
+                            print(f"{header}: {value}")
+
                     current_request = b""
-                elif character == double CRLF and Content-Length in current_request:
-                    current_request += chunk[character:Content-Length+1]
-                    parse_current_request()
-                    do_current_request_logic()
-                    current_request = b""
-            '''
+
+if __name__ == "__main__":
+    main()
