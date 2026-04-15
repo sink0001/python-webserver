@@ -1,5 +1,5 @@
 import socket
-from parser.http_parsing import parse_request_line, parse_headers
+from parser.HTTP_request import HTTP_request
 
 
 def main():
@@ -27,8 +27,8 @@ def main():
                     current_request += last_4_bytes
 
                 if last_4_bytes == b"\r\n\r\n":
-                    request_line, rest_of_request = parse_request_line(current_request)
-                    headers = parse_headers(rest_of_request)
+                    http_request = HTTP_request(current_request)
+                    request_line, headers = http_request.request_line, http_request.headers
 
                     print(f"Request line:\n- Method: {request_line["method"]}\n- Target: {request_line["target"]}\n- Version: {request_line["http_version"]}")
                     for header in headers:
