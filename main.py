@@ -21,21 +21,20 @@ def main():
             if not chunk:
                 break
             
-            for i in range(4, len(chunk)+1):
-                last_4_bytes = chunk[i-4:i]
-                if i % 4 == 0:
-                    current_request += last_4_bytes
+            for i in range(len(chunk)):
+                current_request += bytes([chunk[i]])
 
-                if last_4_bytes == b"\r\n\r\n":
+                if current_request[-4:] == b"\r\n\r\n":
                     http_request = HTTP_request(current_request)
-                    request_line, headers = http_request.request_line, http_request.headers
 
-                    print(f"Request line:\n- Method: {request_line["method"]}\n- Target: {request_line["target"]}\n- Version: {request_line["http_version"]}")
-                    for header in headers:
-                        for value in headers[header]:
-                            print(f"{header}: {value}")
+                    print(f"Request line:\n- Method: {http_request.request_line["method"]}\n- Target: {http_request.request_line["target"]}\n- Version: {http_request.request_line["http_version"]}")
+                    for header_name in http_request.headers:
+                        for header_value in http_request.headers[header_name]:
+                            print(f"{header_name}: {header_value}")
 
                     current_request = b""
+
+
 
 if __name__ == "__main__":
     main()
