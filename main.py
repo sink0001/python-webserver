@@ -16,16 +16,30 @@ def main():
         print(f"connection: {connection} address: {address}")
 
         current_request = b""
+        current_body = b""
+        body_bytes_left = -1
         while True:
             chunk = connection.recv(8192)
             if not chunk:
                 break
             
             for i in range(len(chunk)):
-                current_request += bytes([chunk[i]])
+                current_character = bytes([chunk[i]])
+                current_request += current_character
+
+                if body_bytes_left > 0:
+                    current_body += current_character
+                    body_bytes_left -= 1
+                if body_bytes_left == 0:
+                    print(current_body)
+                    current_body = b""
+                    body_bytes_left = -1
 
                 if current_request[-4:] == b"\r\n\r\n":
                     http_request = HTTP_request(current_request)
+
+                    if "content-length" in http_request.headers:
+                        body_bytes_left = int(http_request.headers["content-length"][0])
 
                     print(f"Request line:\n- Method: {http_request.request_line["method"]}\n- Target: {http_request.request_line["target"]}\n- Version: {http_request.request_line["http_version"]}")
                     for header_name in http_request.headers:
