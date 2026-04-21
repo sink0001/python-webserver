@@ -1,5 +1,6 @@
 import socket
 from parser.HTTP_request import HTTP_request
+from exceptions import RequestContinuityError
 
 
 def main():
@@ -15,6 +16,7 @@ def main():
         connection, address = sock.accept()
         print(f"connection: {connection} address: {address}")
 
+        http_request = 0
         current_request = b""
         current_body = b""
         body_bytes_left = -1
@@ -31,7 +33,10 @@ def main():
                     current_body += current_character
                     body_bytes_left -= 1
                 if body_bytes_left == 0:
-                    print(current_body)
+                    if not http_request:
+                        raise RequestContinuityError(f"Expected a current http request object when waiting for its body {current_body}, instead got {http_request}")
+                    http_request.parse_body(current_body)
+                    print(f"Body:\n{http_request.body}")
                     current_body = b""
                     body_bytes_left = -1
 
@@ -41,11 +46,11 @@ def main():
                     if "content-length" in http_request.headers:
                         body_bytes_left = int(http_request.headers["content-length"][0])
 
-                    print(f"Request line:\n- Method: {http_request.request_line["method"]}\n- Target: {http_request.request_line["target"]}\n- Version: {http_request.request_line["http_version"]}")
-                    for header_name in http_request.headers:
-                        for header_value in http_request.headers[header_name]:
-                            print(f"{header_name}: {header_value}")
-
+                        print(f"Request line:\n- Method: {http_request.request_line["method"]}\n- Target: {http_request.request_line["target"]}\n- Version: {http_request.request_line["http_version"]}")
+                        for header_name in http_request.headers:
+                            for header_value in http_request.headers[header_name]:
+                                print(f"{header_name}: {header_value}")
+                    
                     current_request = b""
 
 
