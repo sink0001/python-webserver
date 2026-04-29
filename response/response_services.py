@@ -17,12 +17,18 @@ def make_status_line(status_code: int) -> str:
         return f"HTTP/1.1 {status_code}"
     
 
-def make_headers(content_length: int, additional_headers: dict[str, list]) -> dict[str, list]:
-    final_headers = {
-        "Content-Length": [str(content_length)],
-        "Connection": ["close"],
-        "Content-Type": ["text/plain"]
-    }
+def make_headers(content_length: int, additional_headers: dict[str, list]) -> dict[str, list[str]]:
+    if content_length > 0:
+        final_headers = {
+            "Content-Length": [str(content_length)],
+            "Connection": ["close"],
+            "Content-Type": ["text/plain"]
+        }
+    else:
+        final_headers = {
+            "Content-Length": [str(content_length)],
+            "Connection": ["close"],
+        }
     
     for header in additional_headers:
         if header.lower() in {"content-length", "content-type"}:
