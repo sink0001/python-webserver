@@ -1,4 +1,4 @@
-from response.response import make_status_line, make_headers
+from response.response_services import make_status_line, make_headers
 from exceptions import InvalidStatusCodeError, IllegalDuplicateHeaderError
 
 
@@ -22,18 +22,18 @@ def test_status_line_creation() -> None:
 
 
 def test_make_headers() -> None:
-    assert make_headers(12, {}) == {"Content-Length": "12", "Connection": "close", "Content-Type": "text/plain"}, "make_headers() function didn't use default headers when no additional ones were given"
-    assert make_headers(12, {"Foo": "Bazz", "Foo": "Bar", "Connection": "keep-alive"}) == {"Content-Length": "12", "Connection": "close", "Content-Type": "text/plain", "Foo": "Bazz", "Foo": "Bar", "Connection": "keep-alive"}
+    assert make_headers(12, {}) == {"Content-Length": ["12"], "Connection": ["close"], "Content-Type": ["text/plain"]}, "make_headers() function didn't use default headers when no additional ones were given"
+    assert make_headers(12, {"Foo": ["Bar", "Bazz"], "Connection": ["keep-alive"]}) == {"Content-Length": ["12"], "Connection": ["close", "keep-alive"], "Content-Type": ["text/plain"], "Foo": ["Bar", "Bazz"]}
 
     try:
-        make_headers(12, {"Content-Type": "foo/bazz"})
+        make_headers(12, {"Content-Type": ["foo/bazz"]})
     except IllegalDuplicateHeaderError:
         pass
     else:
         raise AssertionError("didn't raise IllegalDuplicateHeaderError when Content-Type given again in headers")
 
     try:
-        make_headers(12, {"CoNtEnt-LeNgTH": "foo/bazz"})
+        make_headers(12, {"CoNtEnt-LeNgTH": ["foo/bazz"]})
     except IllegalDuplicateHeaderError:
         pass
     else:
