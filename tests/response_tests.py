@@ -24,7 +24,7 @@ def test_status_line_creation() -> None:
 
 def test_make_headers() -> None:
     assert make_headers(12, {}) == {"Content-Length": ["12"], "Connection": ["close"], "Content-Type": ["text/plain"]}, "make_headers() function didn't use default headers when no additional ones were given"
-    assert make_headers(12, {"Foo": ["Bar", "Bazz"], "Connection": ["keep-alive"]}) == {"Content-Length": ["12"], "Connection": ["close", "keep-alive"], "Content-Type": ["text/plain"], "Foo": ["Bar", "Bazz"]}
+    assert make_headers(12, {"Foo": ["Bar", "Bazz"], "Connection": ["keep-alive"]}) == {"Content-Length": ["12"], "Connection": ["keep-alive"], "Content-Type": ["text/plain"], "Foo": ["Bar", "Bazz"]}
 
     try:
         make_headers(12, {"Content-Type": ["foo/bazz"]})
@@ -51,14 +51,14 @@ def test_HTTP_response_class() -> None:
     response2 = HTTP_response(400, "Hello World!!!", {"Foo": ["Bar", "Bazz"], "Connection": ["keep-alive"]})
     assert response2.status_line == "HTTP/1.1 400 Bad Request"
     assert response2.status_code == 400
-    assert response2.headers == {"Content-Length": ["14"], "Connection": ["close", "keep-alive"], "Content-Type": ["text/plain"], "Foo": ["Bar", "Bazz"]}, f"{response2.headers} not parsed correctly"
-    assert response2.raw_response == b"HTTP/1.1 400 Bad Request\r\nContent-Length: 14\r\nConnection: close\r\nConnection: keep-alive\r\nContent-Type: text/plain\r\nFoo: Bar\r\nFoo: Bazz\r\n\r\nHello World!!!", {response2.raw_response}
+    assert response2.headers == {"Content-Length": ["14"], "Connection": ["keep-alive"], "Content-Type": ["text/plain"], "Foo": ["Bar", "Bazz"]}, f"{response2.headers} not parsed correctly"
+    assert response2.raw_response == b"HTTP/1.1 400 Bad Request\r\nContent-Length: 14\r\nConnection: keep-alive\r\nContent-Type: text/plain\r\nFoo: Bar\r\nFoo: Bazz\r\n\r\nHello World!!!", {response2.raw_response}
 
-    response3 = HTTP_response(404, "Hello World!!!", {"Foo": ["Bar", "Bazz"], "connection": ["keep-alive"]})
+    response3 = HTTP_response(404, "Hello World!!!", {"Foo": ["Bar", "Bazz"], "connection": ["keep-alive"], "foo": ["bar", "bazz"]})
     assert response3.status_line == "HTTP/1.1 404"
     assert response3.status_code == 404
-    assert response3.headers == {"Content-Length": ["14"], "Connection": ["close"], "connection": ["keep-alive"], "Content-Type": ["text/plain"], "Foo": ["Bar", "Bazz"]}, f"{response3.headers} not parsed correctly"
-    assert response3.raw_response == b"HTTP/1.1 404\r\nContent-Length: 14\r\nConnection: close\r\nContent-Type: text/plain\r\nFoo: Bar\r\nFoo: Bazz\r\nconnection: keep-alive\r\n\r\nHello World!!!", f"{response3.raw_response}"
+    assert response3.headers == {"Content-Length": ["14"], "Connection": ["keep-alive"], "Content-Type": ["text/plain"], "Foo": ["Bar", "Bazz"], "foo": ["bar", "bazz"]}, f"{response3.headers} not parsed correctly"
+    assert response3.raw_response == b"HTTP/1.1 404\r\nContent-Length: 14\r\nConnection: keep-alive\r\nContent-Type: text/plain\r\nFoo: Bar\r\nFoo: Bazz\r\nfoo: bar\r\nfoo: bazz\r\n\r\nHello World!!!", f"{response3.raw_response}"
 
     assert HTTP_response(200, "", {}).raw_response == b"HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", f"{HTTP_response(200, "", {}).raw_response}"
 

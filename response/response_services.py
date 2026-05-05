@@ -31,14 +31,13 @@ def make_headers(content_length: int, additional_headers: dict[str, list]) -> di
         }
     
     for header in additional_headers:
-        if header.lower() in {"content-length", "content-type"}:
-            content_length_count = [header.lower() for header in additional_headers].count("content-length")
-            content_type_count = [header.lower() for header in additional_headers].count("content-type")
-            raise IllegalDuplicateHeaderError(f"expected 1 content-length header, got {content_length_count} expected 1 content-type header got {content_type_count}")
-        
+        lower_header = header.lower()
         header_value = additional_headers[header]
-        if header in final_headers:
-            final_headers[header] += header_value
+
+        if lower_header in {"content-length", "content-type"}:
+            raise IllegalDuplicateHeaderError(f"expected 1 content-length header and 1 content-type header")
+        elif lower_header == "connection":
+            final_headers["Connection"] = header_value
         else:
             final_headers[header] = header_value
 
