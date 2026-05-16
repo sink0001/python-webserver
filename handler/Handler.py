@@ -17,5 +17,9 @@ class Handler:
     def handle(self, request: HTTP_request) -> HTTP_response:
         target = request.request_line["target"]
         if target in self.route_handlers:
-            return self.route_handlers[target](request)
+            try:
+                return self.route_handlers[target](request)
+            except Exception as e:
+                print(f"error in handler function: {e}")
+                return HTTP_response(500, "Server side error", {})
         return HTTP_response(404, "", {})

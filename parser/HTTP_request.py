@@ -6,6 +6,7 @@ class HTTP_request:
         self.request = request
         self.request_line, rest_of_request = parse_request_line(request)
         self.headers = parse_headers(rest_of_request)
+        self.body = None
     
     def parse_body(self, body: bytes) -> None:
         self.body = body.decode("utf-8")

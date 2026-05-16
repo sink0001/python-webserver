@@ -12,8 +12,20 @@ def home(request: HTTP_request) -> HTTP_response:
 
 @handler.route("/something")
 def something(request: HTTP_request) -> HTTP_response:
-    return HTTP_response(200, "This is something", {})
+    return HTTP_response(200, "This is something", {"connection": ["keep-alive"]})
 
+@handler.route("/cool-page")
+def cool(request: HTTP_request) -> HTTP_response:
+    response_body = ""
+    if request.body:
+        response_body = f"Hello, your body is: \n{request.body}"
+    else:
+        response_body = "Hello"
+    return HTTP_response(200, response_body, {})
+
+@handler.route("/myproblem")
+def my_problem(request: HTTP_request):
+    raise Exception("something went wrong")
 
 if __name__ == "__main__":
     try:
