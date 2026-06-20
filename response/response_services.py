@@ -17,7 +17,7 @@ def make_status_line(status_code: int) -> str:
         return f"HTTP/1.1 {status_code}"
     
 
-def make_headers(content_length: int, additional_headers: dict[str, list]) -> dict[str, list[str]]:
+def make_headers(content_length: int, headers: dict[str, list]) -> dict[str, list[str]]:
     if content_length > 0:
         final_headers = {
             "Content-Length": [str(content_length)],
@@ -30,11 +30,11 @@ def make_headers(content_length: int, additional_headers: dict[str, list]) -> di
             "Connection": ["close"],
         }
     
-    for header in additional_headers:
+    for header in headers:
         lower_header = header.lower()
-        header_value = additional_headers[header]
+        header_value = headers[header]
 
-        if lower_header in {"content-length", "content-type"}:
+        if lower_header == "content-length":
             raise IllegalDuplicateHeaderError(f"expected 1 content-length header and 1 content-type header")
         elif lower_header == "connection":
             final_headers["Connection"] = header_value
